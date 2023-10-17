@@ -7,7 +7,7 @@
 // Adapted from: https://gist.github.com/daniel-rueda/132c1a556dad7cf6b734b59ed47a1f75
 // Based on https://code.tutsplus.com/articles/securing-communications-on-ios--cms-28529
 
-import Foundation
+import UIKit
 import Security
 
 // For expired + upcoming certificate
@@ -39,6 +39,52 @@ extension Certificate {
             return Certificate(certificate: cert, data: data)
         }).compactMap({$0})
     }
+    
+    
+    static func localCertificate(from assetTag : String, orFile filename: String, orKeyChain kc_certificateData: inout Data?) -> Certificate? {
+        let dataSetAsset = Certificate_DataSetAsset()
+        var key_Data: Data?
+        var kc_keyCopy = kc_certificateData
+        
+        let myGroup = DispatchGroup()
+        
+        do {
+            key_Data = try dataSetAsset.certificateData(from: &kc_certificateData, orFile: filename)
+        } catch {
+            myGroup.enter()
+            dataSetAsset.certificate(fromAssetTag: assetTag, orFile: filename, completed: { result in
+                switch result {
+                case .success(let int32Array):
+                    key_Data  = int32Array
+                    kc_keyCopy = key_Data
+                case .failure(let error):
+                    print(error)
+                }
+                myGroup.leave()
+            })
+            key_Data = kc_keyCopy
+            myGroup.wait()
+        }
+        
+        guard let certificate = SecCertificateCreateWithData(nil, key_Data! as CFData) else { return nil }
+        return Certificate(certificate: certificate, data: key_Data!)
+        
+//        let dataSetAsset = FBDataSetAsset()
+//        var dataAsset: NSDataAsset?
+//
+//        dataSetAsset.dataAsset(withTag: assetTag, orFile: "fatsecretCurrent", completed: { result in
+//            switch result {
+//            case .success(let dataAsset):
+//                let data = dataAsset.data as Data
+//                let certificate = SecCertificateCreateWithData(nil, data as CFData)
+//                return Certificate(certificate: certificate, data: data)
+//
+//            case .failure(let error):
+//                print(error)
+//            }
+//        })
+    }
+    
 
     func validate(against certData: Data, using secTrust: SecTrust) -> Bool {
         let certArray = [certificate] as CFArray
