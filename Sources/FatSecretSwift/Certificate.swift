@@ -41,7 +41,7 @@ extension Certificate {
     }
     
     
-    static func localCertificate(from assetTag : String, orFile filename: String, orKeyChain kc_certificateData: inout Data?) -> Certificate? {
+    static func retreiveCertificate(from assetTag : String, orFile filename: String, orKeyChain kc_certificateData: inout Data?) -> Certificate? {
         let dataSetAsset = Certificate_DataSetAsset()
         var key_Data: Data?
         var kc_keyCopy = kc_certificateData
