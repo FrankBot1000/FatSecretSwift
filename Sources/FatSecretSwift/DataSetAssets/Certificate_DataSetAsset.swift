@@ -45,7 +45,7 @@ struct Certificate_DataSetAsset {
     func dataAssetWithName(_ name: String) throws -> NSDataAsset {
         guard let asset = NSDataAsset(name: name) else {
             print("Missing data asset: \(name)")
-            throw FBAssetError.unableToLoadFile
+            throw Certificate_AssetError.unableToLoadFile
         }
         return asset
     }
@@ -74,15 +74,15 @@ struct Certificate_DataSetAsset {
                 return key_Int32Array
             } catch {
                 print("Catch-all for other errors... Unable to load/retreive Data Asset")
-                throw FBAssetError.unableToDownLoad
+                throw Certificate_AssetError.unableToDownLoad
             }
         }
     }
     
     
     /// Attempts to retreive data from On-Demand Resource data asset file.
-    func certificate(fromAssetTag assetTag: String, orFile filename: String, completed: @escaping (Result<Data, FBAssetError>) -> Void) {
-        let odr_assetFetch  = FBODR_DataSetAssetFetch() // Attempt to fetch from on-line on-demand resource
+    func certificate(fromAssetTag assetTag: String, orFile filename: String, completed: @escaping (Result<Data, Certificate_AssetError>) -> Void) {
+        let odr_assetFetch  = Certificate_DataSetAssetFetch() // Attempt to fetch from on-line on-demand resource
         odr_assetFetch.fetchAssetWith(tag: assetTag, orFile: filename) { result in
             switch result {
             case .success(let dataAsset):
@@ -91,7 +91,7 @@ struct Certificate_DataSetAsset {
                 
             case .failure(let error):
                 print("Missing data.... Error: \(error)")
-                completed(.failure(FBAssetError.unableToDownLoad))
+                completed(.failure(Certificate_AssetError.unableToDownLoad))
             }
         }
     }
@@ -114,7 +114,7 @@ struct Certificate_DataSetAsset {
                 return key_Int32Array
             } catch {
                 print("Catch-all for other errors... Unable to load/retreive Data Asset")
-                throw FBAssetError.unableToDownLoad
+                throw Certificate_AssetError.unableToDownLoad
             }
         }
     }
@@ -122,8 +122,8 @@ struct Certificate_DataSetAsset {
     
     
     /// Attempts to data asset from On-Demand Resource data asset file.
-    func dataAsset(withTag assetTag: String, orFile filename: String, completed: @escaping (Result<NSDataAsset, FBAssetError>) -> Void) {
-        let odr_assetFetch  = FBODR_DataSetAssetFetch() // Attempt to fetch from on-line on-demand resource
+    func dataAsset(withTag assetTag: String, orFile filename: String, completed: @escaping (Result<NSDataAsset, Certificate_AssetError>) -> Void) {
+        let odr_assetFetch  = Certificate_DataSetAssetFetch() // Attempt to fetch from on-line on-demand resource
         odr_assetFetch.fetchAssetWith(tag: assetTag, orFile: filename) { result in
             switch result {
             case .success(let dataAsset):
@@ -131,7 +131,7 @@ struct Certificate_DataSetAsset {
             
             case .failure(let error):
                 print("Missing data.... Error: \(error)")
-                completed(.failure(FBAssetError.unableToDownLoad))
+                completed(.failure(Certificate_AssetError.unableToDownLoad))
             }
         }
     }
