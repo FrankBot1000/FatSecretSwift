@@ -96,7 +96,8 @@ public class CertificatePinningURLSessionDelegate: NSObject, URLSessionDelegate 
         let serverCertificateData = SecCertificateCopyData(certificate) as Data
         let certificates = Certificate.localCertificates(from: certificateDatas)
         for localCert in certificates {
-            if localCert.validate(against: serverCertificateData, using: serverTrust) {
+            let isLocalCertificateValid = localCert.validate(against: serverCertificateData, using: serverTrust)
+            if isLocalCertificateValid {
                 completionHandler(.useCredential, URLCredential(trust: serverTrust))
                 return // exit as soon as we found a match
             }
