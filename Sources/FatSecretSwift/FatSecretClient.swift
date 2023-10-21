@@ -125,7 +125,7 @@ open class FatSecretClient {
         fatSecretRecipeIDRequest(with: components, certPinningDelegate: certPinningDelegate) { result in
             switch result {
             case .success(let recipe):
-//                print("Successfully found recipe id over internet.")
+                print("Successfully found recipe with name: \(recipe.recipe_name).")
                 completion(.success(recipe))
 
             case .failure(let error):
