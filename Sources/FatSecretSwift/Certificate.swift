@@ -28,6 +28,7 @@ struct Certificate {
 }
 
 extension Certificate {
+    /// Deprecated. Using 'localCertificates(from datas: [Data])->[Certificate]' instead.
     static func localCertificates(with names: [String] = [kCertificate.renewed.name, kCertificate.current.name],
                                   from bundle: Bundle = .main) -> [Certificate] {
         return names.lazy.map({
@@ -37,6 +38,14 @@ extension Certificate {
                     return nil
             }
             return Certificate(certificate: cert, data: data)
+        }).compactMap({$0})
+    }
+    
+    
+    static func localCertificates(from datas: [Data]) -> [Certificate] {
+        return datas.lazy.map({
+            guard let secCert = SecCertificateCreateWithData(nil, $0 as CFData) else { return nil }
+            return Certificate(certificate: secCert, data: $0)
         }).compactMap({$0})
     }
 
@@ -56,6 +65,13 @@ extension Certificate {
 }
 
 public class CertificatePinningURLSessionDelegate: NSObject, URLSessionDelegate {
+    
+    public var certificateDatas: [Data]
+    
+    public init(certificateDatas: [Data]) {
+        self.certificateDatas = certificateDatas
+    }
+    
     public func urlSession(_ session: URLSession,
                     didReceive challenge: URLAuthenticationChallenge,
                     completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Swift.Void) {
@@ -78,7 +94,7 @@ public class CertificatePinningURLSessionDelegate: NSObject, URLSessionDelegate 
         }
 
         let serverCertificateData = SecCertificateCopyData(certificate) as Data
-        let certificates = Certificate.localCertificates()
+        let certificates = Certificate.localCertificates(from: certificateDatas)
         for localCert in certificates {
             if localCert.validate(against: serverCertificateData, using: serverTrust) {
                 completionHandler(.useCredential, URLCredential(trust: serverTrust))
