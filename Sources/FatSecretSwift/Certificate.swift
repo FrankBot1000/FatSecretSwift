@@ -12,9 +12,9 @@ import Security
 
 // For expired + upcoming certificate
 enum kCertificate: String {
-    case renewed    = "CertificateRenewed"      // CertificateRenewed; use placeholder for now
+    case renewed    = "fatsecretCurrent_new"    // Certificate Renewed
     case current    = "fatsecretCurrent"        // Certificate
-    case domain     = "platform.fatsecret.com"  // domain to validate
+    case domain     = "platform.fatsecret.com"  // Domain to Validate
     
     var name: String {
         self.rawValue
@@ -28,7 +28,8 @@ struct Certificate {
 }
 
 extension Certificate {
-    /// Deprecated. Using 'localCertificates(from datas: [Data])->[Certificate]' instead.
+
+    @available(*, deprecated, message: "Use localCertificates(from datas: [Data])->[Certificate] {...} instead.")
     static func localCertificates(with names: [String] = [kCertificate.renewed.name, kCertificate.current.name],
                                   from bundle: Bundle = .main) -> [Certificate] {
         return names.lazy.map({
