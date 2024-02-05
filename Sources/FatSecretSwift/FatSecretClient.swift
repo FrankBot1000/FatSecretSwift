@@ -188,9 +188,11 @@ extension FatSecretClient {
         var request = URLRequest(url: URL(string: String(describing: components).replacingOccurrences(of: "+", with: "%2B"))!)
         request.httpMethod = FatSecretParams.httpType
 
-        let session = certPinningDelegate != nil
-        ? URLSession(configuration: URLSessionConfiguration.ephemeral, delegate: certPinningDelegate, delegateQueue: nil)
-        : URLSession(configuration: URLSessionConfiguration.ephemeral)
+        guard certPinningDelegate != nil else {
+            completed(.failure(.unableToComplete))
+            return
+        }
+        let session = URLSession(configuration: URLSessionConfiguration.ephemeral, delegate: certPinningDelegate, delegateQueue: nil)
         
         let task = session.dataTask(with: request) { (data, response, error) in
             if let _ = error {
@@ -227,9 +229,11 @@ extension FatSecretClient {
         var request = URLRequest(url: URL(string: String(describing: components).replacingOccurrences(of: "+", with: "%2B"))!)
         request.httpMethod = FatSecretParams.httpType
 
-        let session = certPinningDelegate != nil
-        ? URLSession(configuration: URLSessionConfiguration.ephemeral, delegate: certPinningDelegate, delegateQueue: nil)
-        : URLSession(configuration: URLSessionConfiguration.ephemeral)
+        guard certPinningDelegate != nil else {
+            completed(.failure(.unableToComplete))
+            return
+        }
+        let session = URLSession(configuration: URLSessionConfiguration.ephemeral, delegate: certPinningDelegate, delegateQueue: nil)
         
         let task = session.dataTask(with: request) { (data, response, error) in
             if let _ = error {
