@@ -57,7 +57,7 @@ fatSecretClient.searchFood(name: "Hotdog") { search in
 
 ``` Swift
 fatSecretClient.searchRecipe(name: "Hotdog") { search in
-    print(search.foods)
+    print(search.recipes)
 }
 ```
 
@@ -70,8 +70,8 @@ fatSecretClient.getFood(id: "16758") { food in
 ```
 
 ``` Swift
-fatSecretClient.getRecipe(id: "16758") { food in
-    print(food)
+fatSecretClient.getRecipe(id: "16758") { recipe in
+    print(recipe)
 }
 ```
 
