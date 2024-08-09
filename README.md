@@ -1,20 +1,20 @@
 # FatSecretSwift
-A framework built to help connect to the FatSecret REST api. Currently the framework supports `foods.search` and `food.get`.
+A framework built to help connect to the FatSecret REST api. Originally built by Nicholas Bellucci with support for `foods.search` and `food.get`. It is extended here with support for 'recipe.search' and 'recipe.get'. You can find the original version here: https://github.com/NicholasBellucci/FatSecretSwift.git.
 
 ### Disclaimer
 
 This framework is mainly a demonstration of how to use OAuth1 with FatSecret. More functionality will probably not be added but feel free to contribute.
 
 ## Requirements
-Xcode 10.x or a Swift 4.2/5.x toolchain with Swift Package Manager.
+Xcode 15.x or a Swift 5.x toolchain with Swift Package Manager.
 
 ## Installation
 
-For use with an Xcode project, FatSecretSwift can be added by navigating to `File > Swift Packages > Add Package Dependency...` and adding `https://github.com/NicholasBellucci/FatSecretSwift.git`
+For use with an Xcode project, FatSecretSwift can be added by navigating to `File > Swift Packages > Add Package Dependency...` and adding `https://github.com/FrankBot1000/FatSecretSwift.git`
 
 Xcode will give a few options when it comes to the rules. Feel free to choose between using the latest release or master as both should align.
 
-FatSecretSwift can also be added through a `Package.swift` file. Just include `.package(url: "https://github.com/NicholasBellucci/FatSecretSwift.git", from: "0.1.0")` as a dependency.
+FatSecretSwift can also be added through a `Package.swift` file. Just include `.package(url: "https://github.com/FrankBot1000/FatSecretSwift.git", from: "0.1.0")` as a dependency.
 
 
 ## Usage
@@ -47,7 +47,7 @@ Once this has been done requests can be made by initializing the FatSecretClient
 let fatSecretClient = FatSecretClient()
 ```
 
-### Search
+### Search Food/Recipe
 
 ``` Swift
 fatSecretClient.searchFood(name: "Hotdog") { search in
@@ -55,7 +55,13 @@ fatSecretClient.searchFood(name: "Hotdog") { search in
 }
 ```
 
-### Get Food
+``` Swift
+fatSecretClient.searchRecipe(name: "Hotdog") { search in
+    print(search.foods)
+}
+```
+
+### Get Food/Recipe
 
 ``` Swift
 fatSecretClient.getFood(id: "16758") { food in
@@ -63,6 +69,12 @@ fatSecretClient.getFood(id: "16758") { food in
 }
 ```
 
+``` Swift
+fatSecretClient.getRecipe(id: "16758") { food in
+    print(food)
+}
+```
+
 ## License
 
-SociableWeaver is, and always will be, MIT licensed. See [LICENSE](LICENSE) for details.
+MIT licensed. See [LICENSE](LICENSE) for details.
