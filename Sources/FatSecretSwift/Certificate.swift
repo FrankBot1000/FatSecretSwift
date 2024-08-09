@@ -12,9 +12,9 @@ import Security
 
 // For expired + upcoming certificate
 enum kCertificate: String {
-    case renewed    = "CertificateRenewed"      // CertificateRenewed; use placeholder for now
+    case renewed    = "fatsecretCurrent_new"    // Certificate Renewed
     case current    = "fatsecretCurrent"        // Certificate
-    case domain     = "platform.fatsecret.com"  // domain to validate
+    case domain     = "platform.fatsecret.com"  // Domain to Validate
     
     var name: String {
         self.rawValue
@@ -28,6 +28,8 @@ struct Certificate {
 }
 
 extension Certificate {
+
+    @available(*, deprecated, message: "Use localCertificates(from datas: [Data])->[Certificate] {...} instead.")
     static func localCertificates(with names: [String] = [kCertificate.renewed.name, kCertificate.current.name],
                                   from bundle: Bundle = .main) -> [Certificate] {
         return names.lazy.map({
@@ -37,6 +39,14 @@ extension Certificate {
                     return nil
             }
             return Certificate(certificate: cert, data: data)
+        }).compactMap({$0})
+    }
+    
+    
+    static func localCertificates(from datas: [Data]) -> [Certificate] {
+        return datas.lazy.map({
+            guard let secCert = SecCertificateCreateWithData(nil, $0 as CFData) else { return nil }
+            return Certificate(certificate: secCert, data: $0)
         }).compactMap({$0})
     }
 
@@ -56,6 +66,13 @@ extension Certificate {
 }
 
 public class CertificatePinningURLSessionDelegate: NSObject, URLSessionDelegate {
+    
+    public var certificateDatas: [Data]
+    
+    public init(certificateDatas: [Data]) {
+        self.certificateDatas = certificateDatas
+    }
+    
     public func urlSession(_ session: URLSession,
                     didReceive challenge: URLAuthenticationChallenge,
                     completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Swift.Void) {
@@ -78,9 +95,10 @@ public class CertificatePinningURLSessionDelegate: NSObject, URLSessionDelegate 
         }
 
         let serverCertificateData = SecCertificateCopyData(certificate) as Data
-        let certificates = Certificate.localCertificates()
+        let certificates = Certificate.localCertificates(from: certificateDatas)
         for localCert in certificates {
-            if localCert.validate(against: serverCertificateData, using: serverTrust) {
+            let isLocalCertificateValid = localCert.validate(against: serverCertificateData, using: serverTrust)
+            if isLocalCertificateValid {
                 completionHandler(.useCredential, URLCredential(trust: serverTrust))
                 return // exit as soon as we found a match
             }
@@ -88,75 +106,5 @@ public class CertificatePinningURLSessionDelegate: NSObject, URLSessionDelegate 
 
         // No valid cert available
         completionHandler(.cancelAuthenticationChallenge, nil)
-    }
-}
-
-
-// --------------------------------------------------------------------------------------------------------
-// Above, nicely cleans up the below
-// from: https://code.tutsplus.com/articles/securing-communications-on-ios--cms-28529:
-class URLSessionPinningDelegate: NSObject, URLSessionDelegate
-{
-    func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Swift.Void)
-    {
-        var success: Bool = false
-        if let serverTrust = challenge.protectionSpace.serverTrust
-        {
-            if (challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust)
-            {
-                //Set policy to validate domain
-                let policy: SecPolicy = SecPolicyCreateSSL(true, "yourdomain.com" as CFString)
-                let policies = NSArray.init(object: policy)
-                SecTrustSetPolicies(serverTrust, policies)
-                
-                let certificateCount: CFIndex = SecTrustGetCertificateCount(serverTrust)
-                if certificateCount > 0
-                {
-                    if let certificate = SecTrustGetCertificateAtIndex(serverTrust, 0)
-                    {
-                        let serverCertificateData = SecCertificateCopyData(certificate) as NSData
-                        
-                        //for loop over array which may contain expired + upcoming certificate
-                        let certFilenames: [String] = ["CertificateRenewed", "Certificate"]
-                        for filenameString: String in certFilenames
-                        {
-                            let filePath = Bundle.main.path(forResource: filenameString, ofType: "cer")
-                            if let file = filePath
-                            {
-                                if let localCertData = NSData(contentsOfFile: file)
-                                {
-                                    //Set anchor cert to your own server
-                                    if let localCert: SecCertificate = SecCertificateCreateWithData(nil, localCertData)
-                                    {
-                                        let certArray = [localCert] as CFArray
-                                        SecTrustSetAnchorCertificates(serverTrust, certArray)
-                                    }
-                                    
-                                    //validates a certificate by verifying its signature plus the signatures of the certificates in its certificate chain, up to the anchor certificate
-                                    var result = SecTrustResultType.invalid
-                                    SecTrustEvaluate(serverTrust, &result);
-                                    let isValid: Bool = (result == SecTrustResultType.unspecified || result == SecTrustResultType.proceed)
-                                    if (isValid)
-                                    {
-                                        //Validate host certificate against pinned certificate.
-                                        if serverCertificateData.isEqual(to: localCertData as Data)
-                                        {
-                                            success = true
-                                            completionHandler(.useCredential, URLCredential(trust:serverTrust))
-                                            break //found a successful certificate, don't need to continue looping
-                                        } //end if serverCertificateData.isEqual(to: localCertData as Data)
-                                    } //end if (isValid)
-                                } //end if let localCertData = NSData(contentsOfFile: file)
-                            } //end if let file = filePath
-                        } //end for filenameString: String in certFilenames
-                    } //end if let certificate = SecTrustGetCertificateAtIndex(serverTrust, 0)
-                } //end if certificateCount > 0
-            } //end if (challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust)
-        } //end if let serverTrust = challenge.protectionSpace.serverTrust
-        
-        if (success == false)
-        {
-            completionHandler(.cancelAuthenticationChallenge, nil)
-        }
     }
 }
