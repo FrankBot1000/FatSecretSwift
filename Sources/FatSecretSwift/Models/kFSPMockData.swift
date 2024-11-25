@@ -140,7 +140,7 @@ struct kFSPMockData {
                             Ingredient(food_id: "35718",
                                        food_name: "Apples",
                                        ingredient_description: "4 medium tart apples, peeled and sliced",
-                                       ingredient_url: URL(string:"https://www.fatsecret.com/calories-nutrition/usda/apples?portionid=32915&portionamount=4.000"),
+                                       ingredient_url: URL(string:"https://www.fatsecret.com/calories-nutrition/usda/apples?portionid=32915&portionamount=4.000")!,
                                        measurement_description: "medium (2-3/4\" dia) (approx 3 per lb)",
                                        number_of_units: "4.000",
                                        serving_id: "32915"),
