@@ -9,10 +9,10 @@ import Foundation
 
 
 
-struct kFSPMockData {
+public struct kFSPMockData {
     
     /// For add test Recipe Favorite via the Demo Mode "Add Test Foods" UISwitch button:
-    static let fspRecipeFavorites: [FSPSingleRecipe] = [
+    public static let fspRecipeFavorites: [FSPSingleRecipe] = [
         FSPSingleRecipe(cooking_time_min: "5",
                         directions: Directions(direction: [
                             Direction(direction_description: "Spread tablespoon of peanut butter onto the middle of tortilla.",
