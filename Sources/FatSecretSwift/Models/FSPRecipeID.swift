@@ -55,6 +55,8 @@ public struct FSPSingleRecipe: Codable, Hashable {
     public let recipe_url: URL?
     
     public let serving_sizes: FSPRecipeServing
+    
+    public var uuid: String? = UUID().uuidString
 }
 
 
